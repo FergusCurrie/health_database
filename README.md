@@ -2,9 +2,9 @@
 Code for connecting to MySQL instance to store health records from apple watch, strava
 
 
-| identifier | creationDate | startDate | endDate | value | 
-| -------- | -------- | -------- | -------- | -------- | 
-| VARCHAR  | DATETIME   | DATETIME  | DATETIME  | FLOAT   | 
+| identifier | creationDate | startDate | endDate | cateogrical_value | numerical_value | 
+| -------- | -------- | -------- | -------- | -------- | -------- | 
+| VARCHAR  | DATETIME   | DATETIME  | DATETIME  | VARCHAR(255)   | FLOAT   | 
 
 
 Apple watch has the following cateogires (numbers give rough indication of frequency from a time period of about 3 months)
@@ -57,48 +57,46 @@ HKCategoryTypeIdentifierSleepAnalysis -> HKCategoryValueSleepAnalysisAsleepCore,
 The easiest solution is to have a column to store the category value and a column to store the numerical value, with NULL in the column that is not relevant.
 
 
-
-## Some useful command 
-
-```
-sudo systemctl status mysql # check if server is up
-sudo mysql # connect to MySQL server
-```
-
-For within MySQL server
-```
-exit # leave the console 
-SELECT current_user(); # find current user
-SELECT database(); # find current db.
-show databases;
-create database <name>;
-show tables;
-create table <table_name>(
-<name_column> <column type>,
-<name_column> <column type>,
-...
-<name_column> <column type>
-);
-show tables; 
-describe <table_name>
-insert into <table_name> values (<col1 entry>, <col2 entry>,...,<coln entry>)
-select * from <table_name>;
-```
-
 ## Setup 
 
 MySQL:
 ```
 sudo apt install mysql-server
-sudo mysql
+sudo systemctl status mysql # check if server is up
+sudo mysql # connect to MySQL server
 create database <name_db=health_records>;
 SELECT user, host FROM mysql.user; # check which uses have MySQL access
 CREATE user 'fergus'@'localhost'; # create new user 
-GRANT ALL PRIVILEGES ON *.* TO 'fergus'@'localhost'; # give all privileges FLUSH PRIVILEGES; 
+GRANT ALL PRIVILEGES ON *.* TO 'fergus'@'localhost'; # give all privileges 
+FLUSH PRIVILEGES; 
+USE health_records;
+CREATE TABLE health_records (
+    identifier VARCHAR(255),
+    creationDate DATETIME,
+    startDate DATETIME,
+    endDate DATETIME,
+    categorical_value VARCHAR(255),
+    numerical_value FLOAT
+);
 ```
 
+
+## Usage
+
+0. (Setup MySQL server)
+1. Export data from apple watch to export.zip
+2. Copy to root of this dir
+3. python3 src/insert_export_into_db.py
 
 python3
 ```
 pip3 install mysql-connector-python
 ```
+
+## Random notes 
+
+- 'export_cda.xml and export.xml'. export_cda.xml: CDA stands for Clinical Document Architecture. Whereas export.xml is all the raw data.
+
+# TODO 
+- test db + python3 tests 
+- export.xml wrapped methods e.g. HKQuantityTypeIdentifierHeartRateVariabilitySDNN, HKQuantityTypeIdentifierFlightsClimbed
