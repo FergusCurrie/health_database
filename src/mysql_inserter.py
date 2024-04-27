@@ -53,7 +53,7 @@ def add_records_after_date(df, last_date_in_db, cursor):
     for i, row in df.iterrows():
         
         if last_date_in_db is not None:
-            date_string = row.endDate.replace(' +1300', '')
+            date_string = row.endDate.replace(' +1300', '').replace(' +1000', '')
             date_format = "%Y-%m-%d %H:%M:%S"
             date = datetime.strptime(date_string, date_format)
             # ignore previously entered dates 
